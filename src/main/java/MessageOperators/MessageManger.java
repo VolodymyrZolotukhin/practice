@@ -2,7 +2,9 @@ package MessageOperators;
 
 
 import javax.servlet.ServletContext;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 public class MessageManger {
     public static final String ATTRIBUTE_NAME = "MessageManager";
@@ -15,6 +17,7 @@ public class MessageManger {
     private LinkedList<Message> SMSs;
     private LinkedList<Message> emails;
     private Thread[] threads;
+    private List<Thread> foreignThreads;
 
     public MessageManger(ServletContext context){
         pushes = new LinkedList<Message>();
@@ -22,6 +25,7 @@ public class MessageManger {
         emails = new LinkedList<Message>();
         threads = new Thread[3];
         this.context = context;
+        foreignThreads = new ArrayList<Thread>();
         initSenders();
     }
 
@@ -108,9 +112,15 @@ public class MessageManger {
         for (Thread th: threads) {
             th.interrupt();
         }
+        for (Thread th: foreignThreads){
+            th.interrupt();
+        }
     }
 
     public ServletContext getContext() {
         return context;
+    }
+    public void addThread(Thread th){
+        foreignThreads.add(th);
     }
 }

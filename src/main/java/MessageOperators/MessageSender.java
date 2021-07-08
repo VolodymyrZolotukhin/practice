@@ -20,6 +20,7 @@ public class MessageSender {
     private Priority priority;
     private MessageManger manger;
     private StatusChecker statusChecker;
+    private Thread thread;
 
     public MessageSender(String url, LinkedList<Message> queue, Priority priority,MessageManger manger){
         this.queue = queue;
@@ -29,7 +30,7 @@ public class MessageSender {
         statusChecker = new StatusChecker(manger, priority, url);
     }
 
-    public Message tryPop(){
+    public synchronized Message tryPop(){
         return queue.pollFirst();
     }
 

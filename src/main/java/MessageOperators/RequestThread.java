@@ -3,19 +3,16 @@ package MessageOperators;
 import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
-import java.util.TimerTask;
+import java.util.Set;
 
-public class RequestTimerTask extends TimerTask {
-    private Map<String, Message> ids;
+public class RequestThread extends Thread {
     private StatusChecker checker;
 
-    public RequestTimerTask(Map<String, Message> ids, StatusChecker checker){
-        this.ids = ids;
+    public RequestThread( StatusChecker checker){
         this.checker = checker;
     }
 
-    private void completeTask(){
-        for (String id: ids.keySet()) {
+    private void completeTask(String id){
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("message_id", id);
             try {
@@ -40,11 +37,30 @@ public class RequestTimerTask extends TimerTask {
                 e.printStackTrace();
                 System.out.println("\n");
             }
-        }
+
     }
 
     @Override
     public void run() {
-        completeTask();
+        try {
+            while (!isInterrupted()) {
+                Set<String> ids = checker.getKeys();
+                if (!ids.isEmpty()) {
+                    for (String st : ids) {
+                        completeTask(st);
+                        synchronized (this) {
+                            long l = (Long) checker.getMessageManger().getContext().getAttribute("delay");
+                            wait(l);
+                        }
+                    }
+                } else {
+                    synchronized (this) {
+                        wait();
+                    }
+                }
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

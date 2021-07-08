@@ -22,19 +22,23 @@ public class StatusChecker {
     private volatile MessageManger messageManger;
     private Priority priority;
     private String url;
+    private Thread thread;
 
     public StatusChecker(MessageManger messageManger, Priority priority, String url){
         this.priority = priority;
         this.url = url;
         messages = synchronizedMap(new HashMap<String, Message>(256));
         this.messageManger = messageManger;
-        RequestTimerTask task = new RequestTimerTask(messages,this);
-        Timer timer = (Timer) messageManger.getContext().getAttribute("Timer"+priority.toString());
-        timer.schedule(task, 0,(Long) messageManger.getContext().getAttribute("delay"));
+        thread = new RequestThread(this);
+        thread.start();
+        messageManger.addThread(thread);
     }
 
     public synchronized void addMessage(String id,Message message){
         messages.put(id,message);
+        synchronized (thread) {
+            thread.notify();
+        }
     }
 
     public synchronized Status checkStatus(String jsonString) throws UnsupportedEncodingException {
@@ -104,4 +108,9 @@ public class StatusChecker {
     public synchronized MessageManger getMessageManger() {
         return messageManger;
     }
+
+    public synchronized Set<String> getKeys(){
+        return messages.keySet();
+    }
+
 }
