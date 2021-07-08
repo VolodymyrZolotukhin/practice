@@ -7,6 +7,7 @@ public class SenderThread extends Thread{
 
     public SenderThread(MessageSender sender){
         super();
+        setDaemon(true);
         this.sender = sender;
     }
 

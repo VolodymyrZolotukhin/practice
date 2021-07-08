@@ -27,7 +27,7 @@ public class StatusChecker {
     public StatusChecker(MessageManger messageManger, Priority priority, String url){
         this.priority = priority;
         this.url = url;
-        messages = synchronizedMap(new HashMap<String, Message>(256));
+        messages = (new HashMap<String, Message>(256));
         this.messageManger = messageManger;
         thread = new RequestThread(this);
         thread.start();
