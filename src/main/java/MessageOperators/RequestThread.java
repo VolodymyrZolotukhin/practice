@@ -9,6 +9,7 @@ public class RequestThread extends Thread {
     private StatusChecker checker;
 
     public RequestThread( StatusChecker checker){
+        super();
         this.checker = checker;
     }
 
@@ -60,7 +61,7 @@ public class RequestThread extends Thread {
                 }
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 }

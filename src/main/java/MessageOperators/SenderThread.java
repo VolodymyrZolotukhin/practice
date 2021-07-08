@@ -6,6 +6,7 @@ public class SenderThread extends Thread{
     private MessageSender sender;
 
     public SenderThread(MessageSender sender){
+        super();
         this.sender = sender;
     }
 
