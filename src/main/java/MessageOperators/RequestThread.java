@@ -46,15 +46,27 @@ public class RequestThread extends Thread {
     public void run() {
             while (!isInterrupted()) {
                 Set<String> ids = checker.getKeys();
-                for (String st : ids) {
-                    completeTask(st);
-                    synchronized (this) {
-                        try {
-                            long l = (Long) checker.getMessageManger().getContext().getAttribute("delay");
-                            wait(l);
-                        } catch (InterruptedException e) {
-                                //interrupt();
+                if (!ids.isEmpty()) {
+                    for (String st : ids) {
+                        if (!isInterrupted()) {
+                            completeTask(st);
+                            synchronized (this) {
+                                try {
+                                    long l = (Long) checker.getMessageManger().getContext().getAttribute("delay");
+                                    wait(l);
+                                } catch (InterruptedException e) {
+                                    interrupt();
+                                }
+                            }
                         }
+                    }
+                }else {
+                    try {
+                        synchronized (this) {
+                            wait();
+                        }
+                    } catch (InterruptedException e) {
+                        interrupt();
                     }
                 }
 
