@@ -10,7 +10,6 @@ public class RequestThread extends Thread {
 
     public RequestThread( StatusChecker checker){
         super();
-        setDaemon(true);
         this.checker = checker;
     }
 
@@ -50,26 +49,25 @@ public class RequestThread extends Thread {
                     for (String st : ids) {
                         if (!isInterrupted()) {
                             completeTask(st);
-                            synchronized (this) {
-                                try {
-                                    long l = (Long) checker.getMessageManger().getContext().getAttribute("delay");
-                                    wait(l);
-                                } catch (InterruptedException e) {
-                                    interrupt();
-                                }
-                            }
                         }
                     }
-                }else {
+                }//else {
+//                    synchronized (this) {
+//                        try {
+//                            wait();
+//                        }catch (InterruptedException e) {
+//                            interrupt();
+//                        }
+//                    }
+//                }
+                synchronized (this) {
                     try {
-                        synchronized (this) {
-                            wait();
-                        }
+                        long l = (Long) checker.getMessageManger().getContext().getAttribute("delay");
+                        wait(l);
                     } catch (InterruptedException e) {
                         interrupt();
                     }
                 }
-
             }
 
     }
