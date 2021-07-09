@@ -73,7 +73,7 @@ public class StatusChecker {
         }else if (messages.get(id).getOutOfDate() == null){
             System.out.println("\n --- getOutOfDate() null --- \n");
         }
-        if (messages.get(id).getOutOfDate().getTime().before(new Date())) {
+        if (messages.get(id).getOutOfDate().getTime().after(new Date())) {
             switch (priority){
                 case PUSH:
                     SettingsContextManager.getInstance(messageManger.getContext()).addPushes_redir();
@@ -90,7 +90,6 @@ public class StatusChecker {
     }
 
     public synchronized void checkAgain(String id){
-        System.out.println("\n--- out "+messages.get(id).getOutOfDate().getTime().before(new Date())+" ---\n");
         if (messages.get(id).getOutOfDate().getTime().before(new Date())) {
             removeMessage(id);
             SettingsContextManager.getInstance(messageManger.getContext()).addSkipped_by_ttl();
