@@ -14,31 +14,22 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
-import static java.util.Collections.synchronizedMap;
-
 public class StatusChecker {
 
     private volatile Map<String, Message> messages;
     private volatile MessageManger messageManger;
     private Priority priority;
     private String url;
-    private Thread thread;
 
     public StatusChecker(MessageManger messageManger, Priority priority, String url){
         this.priority = priority;
         this.url = url;
         messages = (new HashMap<String, Message>(256));
         this.messageManger = messageManger;
-        thread = new RequestThread(this);
-        thread.start();
-        messageManger.addThread(thread);
     }
 
     public synchronized void addMessage(String id,Message message){
         messages.put(id,message);
-        synchronized (thread) {
-            thread.notify();
-        }
     }
 
     public synchronized Status checkStatus(String jsonString) throws UnsupportedEncodingException {

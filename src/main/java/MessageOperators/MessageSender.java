@@ -19,14 +19,12 @@ public class MessageSender {
     private String  url;
     private Priority priority;
     private MessageManger manger;
-    private StatusChecker statusChecker;
 
     public MessageSender(String url, LinkedList<Message> queue, Priority priority,MessageManger manger){
         this.queue = queue;
         this.url = url;
         this.priority = priority;
         this.manger = manger;
-        statusChecker = new StatusChecker(manger, priority, url);
     }
 
     public synchronized Message tryPop(){
@@ -68,7 +66,7 @@ public class MessageSender {
             JSONObject jsonObject = new JSONObject(string);
             if (jsonObject.getString("status").equals("accepted")){
                 //System.out.println("\n--- Start Checker ---\n");
-                statusChecker.addMessage(jsonObject.getString("id"),message);
+                manger.pushToChecker(jsonObject.getString("id"),message,priority);
             }else{
                 switch (priority){
                     case PUSH:
