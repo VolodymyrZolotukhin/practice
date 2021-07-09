@@ -14,6 +14,8 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
+import static java.util.Collections.synchronizedMap;
+
 public class StatusChecker {
 
     private volatile Map<String, Message> messages;
@@ -24,8 +26,9 @@ public class StatusChecker {
     public StatusChecker(MessageManger messageManger, Priority priority, String url){
         this.priority = priority;
         this.url = url;
-        messages = (new HashMap<String, Message>(256));
+        messages = synchronizedMap(new HashMap<String, Message>(256));
         this.messageManger = messageManger;
+
     }
 
     public synchronized void addMessage(String id,Message message){

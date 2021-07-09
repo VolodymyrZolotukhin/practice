@@ -13,7 +13,7 @@ import java.util.Timer;
 public class ExchangeListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        servletContextEvent.getServletContext().setAttribute("delay", 1000L);
+        servletContextEvent.getServletContext().setAttribute("delay", 10000L);
 
         SettingsContextManager contextManager = new SettingsContextManager();
         servletContextEvent.getServletContext().setAttribute(SettingsContextManager.ATTRIBUTE_NAME,contextManager);

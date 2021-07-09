@@ -10,6 +10,7 @@ public class RequestThread extends Thread {
 
     public RequestThread( StatusChecker checker){
         super();
+        super.setDaemon(true);
         this.checker = checker;
     }
 
@@ -20,15 +21,15 @@ public class RequestThread extends Thread {
                 Status status = checker.checkStatus(jsonObject.toString());
                 switch (status) {
                     case ACCEPTED:
-                        //System.out.println("\n --- checker.checkAgain ---\n");
+                        System.out.println("\n --- checker.checkAgain ---\n");
                         checker.checkAgain(id);
                         break;
                     case REJECTED:
-                        //System.out.println("\n --- checker.sendAgain --- \n");
+                        System.out.println("\n --- checker.sendAgain --- \n");
                         checker.sendAgain(id);
                         break;
                     case DELIVERED:
-                        //System.out.println("\n --- checker.removeMessage --- \n");
+                        System.out.println("\n --- checker.removeMessage --- \n");
                         SettingsContextManager.getInstance(checker.getMessageManger().getContext()).addTotal();
                         checker.removeMessage(id);
                         break;
@@ -43,10 +44,10 @@ public class RequestThread extends Thread {
 
     @Override
     public void run() {
-            while (!isInterrupted()) {
+            while (!Thread.currentThread().isInterrupted()) {
                 Set<String> ids = checker.getKeys();
                     for (String st : ids) {
-                        if (!isInterrupted()) {
+                        if (!super.isInterrupted()) {
                             completeTask(st);
                         }
                     }
@@ -56,7 +57,7 @@ public class RequestThread extends Thread {
                         long l = (Long) checker.getMessageManger().getContext().getAttribute("delay");
                         wait(l);
                     } catch (InterruptedException e) {
-                        interrupt();
+                        Thread.currentThread().interrupt();
                     }
                 }
             }
