@@ -2,16 +2,16 @@ package MessageOperators;
 
 import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
-import java.util.Map;
 import java.util.Set;
 
-public class RequestThread extends Thread {
+public class RequestThread implements handleRunnable {
     private StatusChecker checker;
+    private final Object mutex = new Object();
+    private boolean running;
 
-    public RequestThread( StatusChecker checker){
-        super();
-        super.setDaemon(true);
+    public RequestThread(StatusChecker checker){
         this.checker = checker;
+        running = true;
     }
 
     private void completeTask(String id){
@@ -44,22 +44,35 @@ public class RequestThread extends Thread {
 
     @Override
     public void run() {
-            while (!Thread.currentThread().isInterrupted()) {
-                Set<String> ids = checker.getKeys();
-                    for (String st : ids) {
-                        if (!super.isInterrupted()) {
-                            completeTask(st);
-                        }
-                    }
+        while (running) {
+            Set<String> ids = checker.getKeys();
+                for (String st : ids) {
+                    completeTask(st);
+                    ids.remove(st);
+                }
 
-                synchronized (this) {
-                    try {
-                        long l = (Long) checker.getMessageManger().getContext().getAttribute("delay");
-                        wait(l);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
+            synchronized (mutex) {
+                try {
+                    long l = (Long) checker.getMessageManger().getContext().getAttribute("delay");
+                    mutex.wait(l);
+                } catch (InterruptedException ignored) {
+
                 }
             }
+        }
+    }
+
+    public void stop(){
+        synchronized (mutex){
+            running = false;
+            mutex.notifyAll();
+        }
+    }
+
+    @Override
+    public void notifyMutex() {
+        synchronized (mutex) {
+            mutex.notifyAll();
+        }
     }
 }

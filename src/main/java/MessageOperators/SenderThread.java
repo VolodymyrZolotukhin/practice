@@ -2,38 +2,50 @@ package MessageOperators;
 
 import java.io.UnsupportedEncodingException;
 
-public class SenderThread extends Thread{
+public class SenderThread implements handleRunnable {
     private MessageSender sender;
+    private final Object mutex = new Object();
+    private boolean running;
 
     public SenderThread(MessageSender sender){
-        super();
-        super.setDaemon(true);
         this.sender = sender;
+        running = true;
     }
 
     @Override
     public void run() {
         try {
-            while (!isInterrupted()) {
+            while (running) {
                 Message message = sender.tryPop();
                 if (message != null) {
-                    if (!isInterrupted()) {
-                        try {
-                            sender.send(message);
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        }
+                    try {
+                        sender.send(message);
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
                     }
                 } else {
-                    synchronized (this) {
-                        wait();
+                    synchronized (mutex) {
+                        mutex.wait();
                     }
                 }
             }
-        } catch (InterruptedException e) {
-            interrupt();
+        } catch (InterruptedException ignored) {
+
         }
 
     }
 
+    @Override
+    public void stop() {
+        synchronized (mutex){
+            running = false;
+            mutex.notifyAll();
+        }
+    }
+
+    public void notifyMutex(){
+        synchronized (mutex) {
+            mutex.notifyAll();
+        }
+    }
 }

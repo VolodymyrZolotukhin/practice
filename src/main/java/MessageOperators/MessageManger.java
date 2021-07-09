@@ -17,6 +17,7 @@ public class MessageManger {
     private LinkedList<Message> SMSs;
     private LinkedList<Message> emails;
     private Thread[] threads;
+    private handleRunnable[] runnables;
     StatusChecker pchecker;
     StatusChecker schecker;
     StatusChecker echecker;
@@ -26,6 +27,7 @@ public class MessageManger {
         SMSs = new LinkedList<Message>();
         emails = new LinkedList<Message>();
         threads = new Thread[6];
+        runnables = new handleRunnable[6];
         this.context = context;
         initSenders();
     }
@@ -43,23 +45,17 @@ public class MessageManger {
         switch (priority){
             case PUSH:
                 pushes.addLast(message);
-                synchronized (threads[0]) {
-                    threads[0].notify();
-                }
+                runnables[0].notifyMutex();
                 break;
 
             case SMS:
                 SMSs.addLast(message);
-                synchronized (threads[1]) {
-                    threads[1].notify();
-                }
+                runnables[1].notifyMutex();
                 break;
 
             case EMAIL:
                 emails.addLast(message);
-                synchronized (threads[2]) {
-                    threads[2].notify();
-                }
+                runnables[2].notifyMutex();
                 break;
         }
     }
@@ -101,16 +97,25 @@ public class MessageManger {
         schecker = new StatusChecker(this,Priority.SMS,URL_SMS);
         echecker = new StatusChecker(this,Priority.EMAIL,URL_EMAIL);
 
-        threads[3] = new RequestThread(pchecker);
-        threads[4] = new RequestThread(schecker);
-        threads[5] = new RequestThread(echecker);
+        runnables[3] = new RequestThread(pchecker);
+        runnables[4] = new RequestThread(schecker);
+        runnables[5] = new RequestThread(echecker);
+
+        threads[3] = new Thread(runnables[3]);
+        threads[4] = new Thread(runnables[4]);
+        threads[5] = new Thread(runnables[5]);
 
         MessageSender push = new MessageSender(URL_PUSH, pushes, Priority.PUSH,this);
         MessageSender sms = new MessageSender(URL_SMS, SMSs, Priority.SMS,this);
         MessageSender email = new MessageSender(URL_EMAIL, emails, Priority.EMAIL,this);
-        threads[0] = new SenderThread(push);
-        threads[1] = new SenderThread(sms);
-        threads[2] = new SenderThread(email);
+
+        runnables[0] = new SenderThread(push);
+        runnables[1] = new SenderThread(sms);
+        runnables[2] = new SenderThread(email);
+
+        threads[0] = new Thread(runnables[0]);
+        threads[1] = new Thread(runnables[1]);
+        threads[2] = new Thread(runnables[2]);
 
         for (Thread th:
                 threads) {
@@ -119,8 +124,16 @@ public class MessageManger {
     }
 
     public void interruptThreads() {
+        for (handleRunnable r: runnables){
+            r.stop();
+        }
+
         for (Thread th: threads) {
-            th.interrupt();
+            try {
+                th.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -131,20 +144,11 @@ public class MessageManger {
     public void pushToChecker(String id, Message message, Priority priority){
         switch (priority){
             case PUSH:
-                synchronized (threads[3]) {
-                    pchecker.addMessage(id, message);
-                    threads[3].notify();
-                }
+                pchecker.addMessage(id, message);
             case SMS:
-                synchronized (threads[4]) {
-                    schecker.addMessage(id, message);
-                    threads[4].notify();
-                }
+                schecker.addMessage(id, message);
             case EMAIL:
-                synchronized (threads[5]){
-                    echecker.addMessage(id, message);
-                    threads[5].notify();
-                }
+                echecker.addMessage(id, message);
         }
     }
 }
