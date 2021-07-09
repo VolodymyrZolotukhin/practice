@@ -21,15 +21,15 @@ public class RequestThread implements handleRunnable {
                 Status status = checker.checkStatus(jsonObject.toString());
                 switch (status) {
                     case ACCEPTED:
-                        System.out.println("\n --- checker.checkAgain ---\n");
+                        //System.out.println("\n --- checker.checkAgain ---\n");
                         checker.checkAgain(id);
                         break;
                     case REJECTED:
-                        System.out.println("\n --- checker.sendAgain --- \n");
+                        //System.out.println("\n --- checker.sendAgain --- \n");
                         checker.sendAgain(id);
                         break;
                     case DELIVERED:
-                        System.out.println("\n --- checker.removeMessage --- \n");
+                        //System.out.println("\n --- checker.removeMessage --- \n");
                         SettingsContextManager.getInstance(checker.getMessageManger().getContext()).addTotal();
                         checker.removeMessage(id);
                         break;

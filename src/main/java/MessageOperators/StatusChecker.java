@@ -28,7 +28,6 @@ public class StatusChecker {
         this.url = url;
         messages = synchronizedMap(new HashMap<String, Message>(256));
         this.messageManger = messageManger;
-
     }
 
     public synchronized void addMessage(String id,Message message){

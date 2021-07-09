@@ -145,10 +145,13 @@ public class MessageManger {
         switch (priority){
             case PUSH:
                 pchecker.addMessage(id, message);
+                break;
             case SMS:
                 schecker.addMessage(id, message);
+                break;
             case EMAIL:
                 echecker.addMessage(id, message);
+                break;
         }
     }
 }
