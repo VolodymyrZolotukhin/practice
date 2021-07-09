@@ -2,9 +2,8 @@ package MessageOperators;
 
 
 import javax.servlet.ServletContext;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MessageManger {
     public static final String ATTRIBUTE_NAME = "MessageManager";
@@ -16,11 +15,13 @@ public class MessageManger {
     private LinkedList<Message> pushes;
     private LinkedList<Message> SMSs;
     private LinkedList<Message> emails;
+
+    private Map<String, Message> checkPushes;
+    private Map<String, Message> checkSMSs;
+    private Map<String, Message> checkEmails;
+
     private Thread[] threads;
     private handleRunnable[] runnables;
-    StatusChecker pchecker;
-    StatusChecker schecker;
-    StatusChecker echecker;
 
     public MessageManger(ServletContext context){
         pushes = new LinkedList<Message>();
@@ -93,13 +94,17 @@ public class MessageManger {
     }
 
     private void initSenders() {
-        pchecker = new StatusChecker(this,Priority.PUSH,URL_PUSH);
-        schecker = new StatusChecker(this,Priority.SMS,URL_SMS);
-        echecker = new StatusChecker(this,Priority.EMAIL,URL_EMAIL);
+        checkPushes = new ConcurrentHashMap<String, Message>();
+        checkSMSs = new ConcurrentHashMap<String, Message>();
+        checkEmails = new ConcurrentHashMap<String, Message>();
 
-        runnables[3] = new RequestThread(pchecker);
-        runnables[4] = new RequestThread(schecker);
-        runnables[5] = new RequestThread(echecker);
+        StatusChecker pchecker = new StatusChecker(this,Priority.PUSH,URL_PUSH,checkPushes);
+        StatusChecker schecker = new StatusChecker(this,Priority.SMS,URL_SMS,checkSMSs);
+        StatusChecker echecker = new StatusChecker(this,Priority.EMAIL,URL_EMAIL,checkEmails);
+
+        runnables[3] = new RequestThread(pchecker,checkPushes);
+        runnables[4] = new RequestThread(schecker,checkSMSs);
+        runnables[5] = new RequestThread(echecker,checkEmails);
 
         threads[3] = new Thread(runnables[3]);
         threads[4] = new Thread(runnables[4]);
@@ -137,21 +142,24 @@ public class MessageManger {
         }
     }
 
-    public ServletContext getContext() {
+    public synchronized ServletContext getContext() {
         return context;
     }
 
-    public void pushToChecker(String id, Message message, Priority priority){
+    public synchronized void pushToChecker(String id, Message message, Priority priority){
         switch (priority){
             case PUSH:
-                pchecker.addMessage(id, message);
+                checkPushes.put(id,message);
+                //System.out.println("\n --- "+id+" --- \n");
+                //System.out.println("\n --- "+checkPushes.size()+" --- \n");
                 break;
             case SMS:
-                schecker.addMessage(id, message);
+                checkSMSs.put(id,message);
                 break;
             case EMAIL:
-                echecker.addMessage(id, message);
+                checkEmails.put(id,message);
                 break;
         }
+        //System.out.println("\n --- pushed to "+priority.toString()+" --- \n");
     }
 }

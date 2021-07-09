@@ -38,7 +38,7 @@ public class StubServlet  extends HttpServlet {
             last = random.nextInt(9);
             if (last > 1) {
                 json.put("status", "accepted");
-                json.put("id", DigestUtils.sha256Hex(json.toString()));
+                json.put("id", DigestUtils.sha256Hex(String.valueOf(random.nextLong())));
                 int r = random.nextInt(8);
                 if (r < 2) {
                     map.put(json.getString("id"), Status.ACCEPTED);

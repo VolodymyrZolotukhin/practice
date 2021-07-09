@@ -2,16 +2,19 @@ package MessageOperators;
 
 import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 import java.util.Set;
 
 public class RequestThread implements handleRunnable {
     private StatusChecker checker;
     private final Object mutex = new Object();
     private boolean running;
+    private Map<String , Message> map;
 
-    public RequestThread(StatusChecker checker){
+    public RequestThread(StatusChecker checker, Map<String , Message> map){
         this.checker = checker;
         running = true;
+        this.map = map;
     }
 
     private void completeTask(String id){
@@ -45,12 +48,6 @@ public class RequestThread implements handleRunnable {
     @Override
     public void run() {
         while (running) {
-            Set<String> ids = checker.getKeys();
-                for (String st : ids) {
-                    completeTask(st);
-                    ids.remove(st);
-                }
-
             synchronized (mutex) {
                 try {
                     long l = (Long) checker.getMessageManger().getContext().getAttribute("delay");
@@ -59,6 +56,12 @@ public class RequestThread implements handleRunnable {
 
                 }
             }
+            Set<String> ids = map.keySet();
+            //System.out.println("\n --- "+ids.size()+" "+this.toString()+" --- \n");
+                for (String st : ids) {
+                    completeTask(st);
+                    //ids.remove(st);
+                }
         }
     }
 

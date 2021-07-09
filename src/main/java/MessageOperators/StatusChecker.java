@@ -23,15 +23,13 @@ public class StatusChecker {
     private Priority priority;
     private String url;
 
-    public StatusChecker(MessageManger messageManger, Priority priority, String url){
+
+    public StatusChecker(MessageManger messageManger, Priority priority, String url, Map<String , Message> map){
         this.priority = priority;
         this.url = url;
-        messages = synchronizedMap(new HashMap<String, Message>(256));
+        messages = (new HashMap<String, Message>());
         this.messageManger = messageManger;
-    }
-
-    public synchronized void addMessage(String id,Message message){
-        messages.put(id,message);
+        this.messages = map;
     }
 
     public synchronized Status checkStatus(String jsonString) throws UnsupportedEncodingException {
@@ -75,7 +73,7 @@ public class StatusChecker {
         }else if (messages.get(id).getOutOfDate() == null){
             System.out.println("\n --- getOutOfDate() null --- \n");
         }
-        if (messages.get(id).getOutOfDate().after(new Date())) {
+        if (messages.get(id).getOutOfDate().getTime().before(new Date())) {
             switch (priority){
                 case PUSH:
                     SettingsContextManager.getInstance(messageManger.getContext()).addPushes_redir();
@@ -92,7 +90,8 @@ public class StatusChecker {
     }
 
     public synchronized void checkAgain(String id){
-        if (!messages.get(id).getOutOfDate().after(new Date())) {
+        System.out.println("\n--- out "+messages.get(id).getOutOfDate().getTime().before(new Date())+" ---\n");
+        if (messages.get(id).getOutOfDate().getTime().before(new Date())) {
             removeMessage(id);
             SettingsContextManager.getInstance(messageManger.getContext()).addSkipped_by_ttl();
         }

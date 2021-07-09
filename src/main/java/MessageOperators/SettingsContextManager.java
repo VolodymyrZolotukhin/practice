@@ -6,16 +6,16 @@ import javax.servlet.ServletContext;
 public class SettingsContextManager {
 
     public static final String ATTRIBUTE_NAME = "SettingsContext";
-    private long received = 0;
-    private long with_error = 0;
-    private long skipped = 0;
-    private long pushes = 0;
-    private long pushes_redir = 0;
-    private long SMSs = 0;
-    private long SMSs_redir = 0;
-    private long emails = 0;
-    private long skipped_by_ttl = 0;
-    private long total = 0;
+    private volatile long received = 0;
+    private volatile long with_error = 0;
+    private volatile long skipped = 0;
+    private volatile long pushes = 0;
+    private volatile long pushes_redir = 0;
+    private volatile long SMSs = 0;
+    private volatile long SMSs_redir = 0;
+    private volatile long emails = 0;
+    private volatile long skipped_by_ttl = 0;
+    private volatile long total = 0;
 
     public SettingsContextManager(){}
 

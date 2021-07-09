@@ -41,6 +41,11 @@ public class Message {
         outOfDate = new GregorianCalendar();
         outOfDate.setTime(time);
         outOfDate.add(Calendar.SECOND,ttl);
+
+       /* System.out.println("\n --- received "+time+" --- ");
+        System.out.println(" --- out "+outOfDate.getTime()+" --- ");
+        System.out.println(" --- "+new Date()+" --- ");
+        System.out.println(" --- if out "+getOutOfDate().after(new Date())+" --- \n");*/
     }
 
     public String getNotification_id() {
