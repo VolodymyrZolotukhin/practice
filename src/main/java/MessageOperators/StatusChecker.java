@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
-import static java.util.Collections.synchronizedMap;
 
 public class StatusChecker {
 
@@ -66,13 +65,6 @@ public class StatusChecker {
     }
 
     public synchronized void sendAgain(String id){
-        if(id == null){
-            System.out.println("\n --- id null --- \n");
-        }else if (messages.get(id) == null){
-            System.out.println("\n --- get(id) null --- \n");
-        }else if (messages.get(id).getOutOfDate() == null){
-            System.out.println("\n --- getOutOfDate() null --- \n");
-        }
         if (messages.get(id).getOutOfDate().getTime().after(new Date())) {
             switch (priority){
                 case PUSH:
@@ -100,8 +92,5 @@ public class StatusChecker {
         return messageManger;
     }
 
-    public synchronized Set<String> getKeys(){
-        return messages.keySet();
-    }
 
 }

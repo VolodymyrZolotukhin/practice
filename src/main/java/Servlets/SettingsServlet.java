@@ -14,7 +14,8 @@ import java.io.IOException;
 public class SettingsServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doPost(req, resp);
+        getServletContext().setAttribute("delay",Long.parseLong(req.getParameter("delay")));
+        doGet(req, resp);
     }
 
     @Override

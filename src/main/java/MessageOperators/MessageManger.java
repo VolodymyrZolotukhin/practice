@@ -38,8 +38,12 @@ public class MessageManger {
     }
 
     public void addMessage(Message message){
-        Priority priority = getPriority(message);
-        pushToQueue(message,priority);
+        if(message.getOutOfDate().getTime().after(new Date())) {
+            Priority priority = getPriority(message);
+            pushToQueue(message, priority);
+        }else {
+            SettingsContextManager.getInstance(context).addSkipped_by_ttl();
+        }
     }
 
     private void pushToQueue(Message message, Priority priority){
